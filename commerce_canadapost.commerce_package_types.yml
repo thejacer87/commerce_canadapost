@@ -1,14 +1,27 @@
 canadapost_default_box:
   remote_id: '01'
-  label: 'Canada Post'
+  label: 'Canada Post - Standard'
   dimensions:
-    length: 30
-    width: 25
-    height: 10
+    length: 245
+    width: 156
+    height: 5
     unit: 'mm'
   weight:
-    number: 30
-    unit: 'kg'
+    number: 50
+    unit: 'g'
+  shipping_method: 'canadapost'
+
+canadapost_default_box:
+  remote_id: '02'
+  label: 'Canada Post - Other'
+  dimensions:
+    length: 380
+    width: 270
+    height: 20
+    unit: 'mm'
+  weight:
+    number: 500
+    unit: 'g'
   shipping_method: 'canadapost'
 
 commerce_package_type:

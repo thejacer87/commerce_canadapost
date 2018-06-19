@@ -1,9 +1,10 @@
 <?php
 
-namespace Drupal\commerce_canadapost;
+namespace Drupal\commerce_canadapost\Api;
 
 use CanadaPost\Rating;
 use Drupal\commerce_order\Entity\Order;
+use Drupal\commerce_shipping\Entity\Shipment;
 
 /**
  * Rate API Wrapper.
@@ -11,6 +12,8 @@ use Drupal\commerce_order\Entity\Order;
 class Rate extends CanadaPost {
 
   /**
+   * The shipment to get a rate for.
+   *
    * @var \Drupal\commerce_shipping\Entity\Shipment
    */
   protected $shipment;
@@ -18,25 +21,29 @@ class Rate extends CanadaPost {
   /**
    * Constructor.
    *
-   * @param string $username Canada Post username
-   * @param string $password Canada Post password
-   * @param string $customerNumber Canada Post customer number
+   * @param string $username
+   *   Canada Post username.
+   * @param string $password
+   *   Canada Post password.
+   * @param string $customerNumber
+   *   Canada Post customer number.
    * @param \Drupal\commerce_shipping\Entity\Shipment $shipment
+   *   The commerce shipment.
    */
   public function __construct(
     $username,
     $password,
     $customerNumber,
-    $shipment
+    Shipment $shipment
   ) {
     parent::__construct($username, $password, $customerNumber);
     $this->shipment = $shipment;
   }
 
   /**
-   * Get rates from Canada Post.
+   * Send the rate request to Canada Post.
    */
-  public function getRates() {
+  public function sendRequest() {
     $order_id = $this->shipment->order_id->target_id;
     $order = Order::load($order_id);
     $store = $order->getStore();
@@ -48,7 +55,6 @@ class Rate extends CanadaPost {
       'username' => $this->getUsername(),
       'password' => $this->getPassword(),
       'customerNumber' => $this->getCustomerNumber(),
-      'customerNumber' => $this->con,
     ]);
 
     $canadapost_rates = $request->getRates($originPostalCode, $postalCode, 1);

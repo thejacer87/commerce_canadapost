@@ -49,10 +49,10 @@ class Commands extends DrushCommands {
   /**
    * Fetch the tracking number for the given tracking PIN.
    *
-   * @command commerce-canadapost-tracking-number
-   *
-   * @param $tracking-pin
+   * @param string $tracking_pin
    *   The tracking PIN for which to fetch the tracking number.
+   *
+   * @command commerce-canadapost-tracking-number
    *
    * @usage commerce-cp-tn 1234567
    *   Fetch the tracking number for the 1234567 tracking PIN.

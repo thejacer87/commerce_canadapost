@@ -1,15 +1,17 @@
 <?php
 
-namespace Drupal\commerce_canadapost;
+namespace Drupal\commerce_canadapost\Api;
 
 /**
  * Canada Post API Service.
  *
  * @package Drupal\commerce_canadapost
  */
-abstract class CanadaPostRequest implements CanadaPostRequestInterface {
+abstract class Request {
   /**
    * The configuration array.
+   *
+   * @var array
    */
   protected $configuration;
 
@@ -19,7 +21,7 @@ abstract class CanadaPostRequest implements CanadaPostRequestInterface {
    * @param array $configuration
    *   A configuration array from a CommerceShippingMethod.
    */
-  public function setConfig(array $configuration) {
+  public function __construct(array $configuration) {
     $this->configuration = $configuration;
   }
 
@@ -32,10 +34,9 @@ abstract class CanadaPostRequest implements CanadaPostRequestInterface {
    * @throws \Exception
    */
   public function getAuth() {
-    // Verify necessary configuration is available.
-    if (empty($this->configuration['api_information']['username'])
-    || empty($this->configuration['api_information']['password'])
-    || empty($this->configuration['api_information']['customer_number'])) {
+    $config = $this->configuration['api_information'];
+
+    if (empty($config['username']) || empty($config['password']) || empty($config['customer_number']) || empty($this->configuration['api_information']['mode'])) {
       throw new \Exception('Configuration is required.');
     }
 
@@ -43,6 +44,7 @@ abstract class CanadaPostRequest implements CanadaPostRequestInterface {
       'username' => $this->configuration['api_information']['username'],
       'password' => $this->configuration['api_information']['password'],
       'customer_number' => $this->configuration['api_information']['customer_number'],
+      'mode' => $this->configuration['api_information']['mode'],
     ];
   }
 
