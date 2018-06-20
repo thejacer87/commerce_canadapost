@@ -59,7 +59,7 @@ class Rate extends CanadaPost {
 
     $canadapost_rates = $request->getRates($originPostalCode, $postalCode, 1);
 
-    return $canadapost_rates;
+    return $canadapost_rates['price-quotes'];
 
   }
 

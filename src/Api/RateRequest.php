@@ -42,14 +42,14 @@ class RateRequest extends Request {
     );
 
     $response = $request->sendRequest();
-    if (empty($response)) {
+    if (empty($response['price-quote'])) {
       return $rates;
     }
 
-    foreach ($response as $rate) {
-      $service_code = $rate['code'];
-      $service_name = $rate['name'];
-      $price = new Price((string) $rate['price'], 'CAD');
+    foreach ($response['price-quote'] as $rate) {
+      $service_code = $rate['service-code'];
+      $service_name = $rate['service-name'];
+      $price = new Price((string) $rate['price-details']['due'], 'CAD');
 
       $shipping_service = new ShippingService(
         $service_code,
