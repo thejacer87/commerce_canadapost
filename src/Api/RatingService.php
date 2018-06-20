@@ -50,6 +50,7 @@ class RatingService implements RatingServiceInterface {
       'username' => $this->config->get('api.username'),
       'password' => $this->config->get('api.password'),
       'customerNumber' => $this->config->get('api.customer_number'),
+      'mode' => $this->getEnvironmentMode(),
     ];
 
     try {
@@ -66,6 +67,13 @@ class RatingService implements RatingServiceInterface {
     }
 
     return $rates;
+  }
+
+  /**
+   * Convert the environment mode to the correct format for the SDK.
+   */
+  private function getEnvironmentMode() {
+    return $this->config->get('api.mode') === 'live' ? 'prod' : 'dev';
   }
 
 }

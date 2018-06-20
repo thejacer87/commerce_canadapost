@@ -54,6 +54,16 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('api.password'),
       '#required' => TRUE,
     ];
+    $form['api']['api_mode'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Mode'),
+      '#default_value' => $config->get('api.mode'),
+      '#options' => [
+        'test' => $this->t('Test'),
+        'live' => $this->t('Live'),
+      ],
+      '#required' => TRUE,
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -67,6 +77,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('api.customer_number', $form_state->getValue('api_customer_number'))
       ->set('api.username', $form_state->getValue('api_username'))
       ->set('api.password', $form_state->getValue('api_password'))
+      ->set('api.mode', $form_state->getValue('api_mode'))
       ->save();
 
     parent::submitForm($form, $form_state);

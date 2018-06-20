@@ -78,7 +78,7 @@ class CanadaPost extends ShippingMethodBase {
         'username' => '',
         'password' => '',
         'customer_number' => '',
-        'mode' => 'dev',
+        'mode' => 'test',
       ],
       'options' => [
         'log' => [],
@@ -205,8 +205,9 @@ class CanadaPost extends ShippingMethodBase {
 
     return (
       !empty($api_information['username'])
-      && !empty($api_information['password']
-        && !empty($api_information['customer_number']))
+      && !empty($api_information['password'])
+      && !empty($api_information['customer_number'])
+      && !empty($api_information['mode'])
     );
   }
 
