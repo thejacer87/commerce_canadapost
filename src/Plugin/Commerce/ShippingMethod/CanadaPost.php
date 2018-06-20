@@ -217,10 +217,10 @@ class CanadaPost extends ShippingMethodBase {
    * @param array $response
    *   The response from the Canada Post API Rating service.
    *
-   * @return ShippingRate[]
+   * @return \Drupal\commerce_shipping\ShippingRate[]
    *   The Canada Post shipping rates.
    */
-  private function parseResponse($response) {
+  private function parseResponse(array $response) {
     $rates = [];
 
     if (empty($response['price-quotes'])) {
@@ -245,4 +245,5 @@ class CanadaPost extends ShippingMethodBase {
 
     return $rates;
   }
+
 }

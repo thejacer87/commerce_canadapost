@@ -65,7 +65,7 @@ class TrackingService implements TrackingServiceInterface {
       return;
     }
 
-    // return the full response for now; we need to find a way to test with a
+    // Return the full response for now; we need to find a way to test with a
     // real shipment that does not return simply 'No Pin History'.
     return $tracking_summary;
   }
