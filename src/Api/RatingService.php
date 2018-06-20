@@ -5,12 +5,12 @@ namespace Drupal\commerce_canadapost\Api;
 use CanadaPost\Exception\ClientException;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use CanadaPost\Tracking;
+use CanadaPost\Rating;
 
 /**
- * Provides the default Tracking API integration services.
+ * Provides the default Rating API integration services.
  */
-class TrackingService implements TrackingServiceInterface {
+class RatingService implements RatingServiceInterface {
 
   /**
    * The Canada Post configuration object.
@@ -45,29 +45,27 @@ class TrackingService implements TrackingServiceInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchTrackingNumber($tracking_pin) {
+  public function getRates($originPostalCode, $postalCode, $weight) {
     $config = [
       'username' => $this->config->get('api.username'),
       'password' => $this->config->get('api.password'),
+      'customerNumber' => $this->config->get('api.customer_number'),
     ];
 
     try {
-      $tracking = new Tracking($config);
-      $tracking_summary = $tracking->getSummary($tracking_pin);
+      $request = new Rating($config);
+      $rates = $request->getRates($originPostalCode, $postalCode, $weight);
     }
     catch (ClientException $exception) {
       $message = sprintf(
-        'An error has been returned by the Canada Post when fetching the tracking summary for the tracking PIN "%s". The error was: "%s"',
-        $tracking_pin,
+        'An error has been returned by the Canada Post when fetching the shipping rates. The error was: "%s"',
         json_encode($exception->getResponseBody())
       );
       $this->logger->error($message);
       return;
     }
 
-    // return the full response for now; we need to find a way to test with a
-    // real shipment that does not return simply 'No Pin History'.
-    return $tracking_summary;
+    return $rates;
   }
 
 }

@@ -2,10 +2,16 @@
 
 namespace Drupal\commerce_canadapost\Plugin\Commerce\ShippingMethod;
 
-use Drupal\commerce_canadapost\Api\RateRequest;
+use Drupal\commerce_canadapost\Api\RatingServiceInterface;
+use Drupal\commerce_order\Entity\Order;
+use Drupal\commerce_price\Price;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
+use Drupal\commerce_shipping\PackageTypeManagerInterface;
 use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\ShippingMethodBase;
+use Drupal\commerce_shipping\ShippingRate;
+use Drupal\commerce_shipping\ShippingService;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the Canada Post shipping method.
@@ -22,6 +28,46 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class CanadaPost extends ShippingMethodBase {
+
+  /**
+   * The rating service.
+   *
+   * @var \Drupal\commerce_canadapost\Api\RatingServiceInterface
+   */
+  protected $ratingService;
+
+  /**
+   * Constructs a new CanadaPost object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\commerce_shipping\PackageTypeManagerInterface $package_type_manager
+   *   The package type manager.
+   * @param \Drupal\commerce_canadapost\Api\RatingServiceInterface $rating_service
+   *   The Canada Post Rating service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PackageTypeManagerInterface $package_type_manager, RatingServiceInterface $rating_service) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $package_type_manager);
+
+    $this->ratingService = $rating_service;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('plugin.manager.commerce_package_type'),
+      $container->get('commerce_canadapost.rating_api')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -80,8 +126,8 @@ class CanadaPost extends ShippingMethodBase {
       '#title' => $this->t('Mode'),
       '#description' => $this->t('Choose whether to use the test or live mode.'),
       '#options' => [
-        'dev' => $this->t('Test'),
-        'prod' => $this->t('Live'),
+        'test' => $this->t('Test'),
+        'live' => $this->t('Live'),
       ],
       '#default_value' => $this->configuration['api_information']['mode'],
     ];
@@ -131,10 +177,18 @@ class CanadaPost extends ShippingMethodBase {
   public function calculateRates(ShipmentInterface $shipment) {
     $rates = [];
 
-    // Only attempt to collect rates if an address exits on the shipment.
+    // Only attempt to collect rates if an address exists on the shipment.
     if (!$shipment->getShippingProfile()->get('address')->isEmpty()) {
-      $request = new RateRequest($this->configuration);
-      $rates = $request->getRates($shipment);
+      $order_id = $shipment->order_id->target_id;
+      $order = Order::load($order_id);
+      /** @var \Drupal\commerce_store\Entity\Store $store */
+      $store = $order->getStore();
+      $address = $store->getAddress();
+      $originPostalCode = $address->getPostalCode();
+      $postalCode = $shipment->getShippingProfile()->address->postal_code;
+      $weight = $shipment->getWeight()->convert('g')->getNumber();
+      $response = $this->ratingService->getRates($originPostalCode, $postalCode, $weight);
+      $rates = $this->parseResponse($response);
     }
 
     return $rates;
@@ -156,4 +210,38 @@ class CanadaPost extends ShippingMethodBase {
     );
   }
 
+  /**
+   * Parse results from Canada Post API into ShippingRates.
+   *
+   * @param array $response
+   *   The response from the Canada Post API Rating service.
+   *
+   * @return ShippingRate[]
+   *   The Canada Post shipping rates.
+   */
+  private function parseResponse($response) {
+    $rates = [];
+
+    if (empty($response['price-quotes'])) {
+      return $rates;
+    }
+
+    foreach ($response['price-quotes']['price-quote'] as $rate) {
+      $service_code = $rate['service-code'];
+      $service_name = $rate['service-name'];
+      $price = new Price((string) $rate['price-details']['due'], 'CAD');
+
+      $shipping_service = new ShippingService(
+        $service_code,
+        $service_name
+      );
+      $rates[] = new ShippingRate(
+        $service_code,
+        $shipping_service,
+        $price
+      );
+    }
+
+    return $rates;
+  }
 }
