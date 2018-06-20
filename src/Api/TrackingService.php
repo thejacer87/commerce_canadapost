@@ -17,6 +17,13 @@ class TrackingService implements TrackingServiceInterface {
    * @var \Drupal\Core\Config\Config
    */
   protected $config;
+  
+  /**
+   * The logger channel factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $logger;
 
   /**
    * Constructs a new TrackingService object.
