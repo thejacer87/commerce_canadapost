@@ -1,7 +1,7 @@
 services:
   commerce_canadapost.rating_api:
     class: Drupal\commerce_canadapost\Api\RatingService
-    arguments: ['@config.factory', '@logger.factory']
+    arguments: ['@config.factory', '@logger.factory', '@entity_type.manager']
 
   commerce_canadapost.tracking_api:
     class: Drupal\commerce_canadapost\Api\TrackingService

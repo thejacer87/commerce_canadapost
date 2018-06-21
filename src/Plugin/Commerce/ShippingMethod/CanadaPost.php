@@ -3,13 +3,9 @@
 namespace Drupal\commerce_canadapost\Plugin\Commerce\ShippingMethod;
 
 use Drupal\commerce_canadapost\Api\RatingServiceInterface;
-use Drupal\commerce_order\Entity\Order;
-use Drupal\commerce_price\Price;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\PackageTypeManagerInterface;
 use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\ShippingMethodBase;
-use Drupal\commerce_shipping\ShippingRate;
-use Drupal\commerce_shipping\ShippingService;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -65,7 +61,8 @@ class CanadaPost extends ShippingMethodBase {
       $plugin_id,
       $plugin_definition,
       $container->get('plugin.manager.commerce_package_type'),
-      $container->get('commerce_canadapost.rating_api')
+      $container->get('commerce_canadapost.rating_api'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -79,6 +76,9 @@ class CanadaPost extends ShippingMethodBase {
         'password' => '',
         'customer_number' => '',
         'mode' => 'test',
+      ],
+      'shipping_information' => [
+        'origin_postal_code' => '',
       ],
       'options' => [
         'log' => [],
@@ -132,6 +132,21 @@ class CanadaPost extends ShippingMethodBase {
       '#default_value' => $this->configuration['api_information']['mode'],
     ];
 
+    $form['shipping_information'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Shipping information'),
+      '#description' => $this->isConfigured() ? $this->t('Update your Shipping information.') : $this->t('Fill in your Shipping information.'),
+      '#weight' => $this->isConfigured() ? 10 : -10,
+      '#open' => !$this->isConfigured(),
+    ];
+
+    $form['shipping_information']['origin_postal_code'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Origin postal code'),
+      '#description' => $this->t("Enter the postal code that your shipping rates will originate. If left empty, shipping rates will be rated from your store's postal code."),
+      '#default_value' => $this->configuration['shipping_information']['origin_postal_code'],
+    ];
+
     $form['options'] = [
       '#type' => 'details',
       '#title' => $this->t('Canada Post Options'),
@@ -160,6 +175,7 @@ class CanadaPost extends ShippingMethodBase {
     $this->configuration['api_information']['password'] = $values['api_information']['password'];
     $this->configuration['api_information']['customer_number'] = $values['api_information']['customer_number'];
     $this->configuration['api_information']['mode'] = $values['api_information']['mode'];
+    $this->configuration['shipping_information']['origin_postal_code'] = $values['shipping_information']['origin_postal_code'];
     $this->configuration['options']['log'] = $values['options']['log'];
 
     return parent::submitConfigurationForm($form, $form_state);
@@ -175,23 +191,12 @@ class CanadaPost extends ShippingMethodBase {
    *   The rates.
    */
   public function calculateRates(ShipmentInterface $shipment) {
-    $rates = [];
-
     // Only attempt to collect rates if an address exists on the shipment.
-    if (!$shipment->getShippingProfile()->get('address')->isEmpty()) {
-      $order_id = $shipment->order_id->target_id;
-      $order = Order::load($order_id);
-      /** @var \Drupal\commerce_store\Entity\Store $store */
-      $store = $order->getStore();
-      $address = $store->getAddress();
-      $originPostalCode = $address->getPostalCode();
-      $postalCode = $shipment->getShippingProfile()->address->postal_code;
-      $weight = $shipment->getWeight()->convert('g')->getNumber();
-      $response = $this->ratingService->getRates($originPostalCode, $postalCode, $weight);
-      $rates = $this->parseResponse($response);
+    if ($shipment->getShippingProfile()->get('address')->isEmpty()) {
+      return [];
     }
 
-    return $rates;
+    return $this->ratingService->getRates($shipment);
   }
 
   /**
@@ -209,41 +214,6 @@ class CanadaPost extends ShippingMethodBase {
       && !empty($api_information['customer_number'])
       && !empty($api_information['mode'])
     );
-  }
-
-  /**
-   * Parse results from Canada Post API into ShippingRates.
-   *
-   * @param array $response
-   *   The response from the Canada Post API Rating service.
-   *
-   * @return \Drupal\commerce_shipping\ShippingRate[]
-   *   The Canada Post shipping rates.
-   */
-  private function parseResponse(array $response) {
-    $rates = [];
-
-    if (empty($response['price-quotes'])) {
-      return $rates;
-    }
-
-    foreach ($response['price-quotes']['price-quote'] as $rate) {
-      $service_code = $rate['service-code'];
-      $service_name = $rate['service-name'];
-      $price = new Price((string) $rate['price-details']['due'], 'CAD');
-
-      $shipping_service = new ShippingService(
-        $service_code,
-        $service_name
-      );
-      $rates[] = new ShippingRate(
-        $service_code,
-        $shipping_service,
-        $price
-      );
-    }
-
-    return $rates;
   }
 
 }

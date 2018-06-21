@@ -2,6 +2,8 @@
 
 namespace Drupal\commerce_canadapost\Api;
 
+use Drupal\commerce_shipping\Entity\ShipmentInterface;
+
 /**
  * Defines the interface for the Rating API integration service.
  */
@@ -10,16 +12,12 @@ interface RatingServiceInterface {
   /**
    * Get rates from the Canada Post API.
    *
-   * @param string $originPostalCode
-   *   The origin postal code.
-   * @param string $postalCode
-   *   The destination postal code.
-   * @param string $weight
-   *   The weight of the package.
+   * @param ShipmentInterface $shipment
+   *   The shipment.
    *
-   * @return array
+   * @return \Drupal\commerce_shipping\ShippingRate[]
    *   The rates returned by Canada Post.
    */
-  public function getRates($originPostalCode, $postalCode, $weight);
+  public function getRates(ShipmentInterface $shipment);
 
 }
