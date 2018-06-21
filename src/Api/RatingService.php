@@ -71,7 +71,7 @@ class RatingService implements RatingServiceInterface {
         ->getAddress()
         ->getPostalCode();
     $postal_code = $shipment->getShippingProfile()->address->postal_code;
-    $weight = $shipment->getWeight()->convert('g')->getNumber();
+    $weight = $shipment->getWeight()->convert('kg')->getNumber();
 
     $config = [
       'username' => $this->config->get('api.username'),
