@@ -64,16 +64,10 @@ class SettingsForm extends ConfigFormBase {
       ],
       '#required' => TRUE,
     ];
-
-    $form['shipping_info'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Shipping Information'),
-      '#open' => TRUE,
-    ];
-    $form['shipping_info']['origin_postal_code'] = [
+    $form['api']['rate']['origin_postal_code'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Origin postal code'),
-      '#default_value' => $config->get('shipping_info.origin_postal_code'),
+      '#default_value' => $config->get('api.rate.origin_postal_code'),
       '#description' => $this->t("Enter the postal code that your shipping rates will originate. If left empty, shipping rates will be rated from your store's postal code."),
     ];
 
@@ -90,7 +84,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('api.username', $form_state->getValue('api_username'))
       ->set('api.password', $form_state->getValue('api_password'))
       ->set('api.mode', $form_state->getValue('api_mode'))
-      ->set('shipping_info.origin_postal_code', $form_state->getValue('origin_postal_code'))
+      ->set('api.rate.origin_postal_code', $form_state->getValue('origin_postal_code'))
       ->save();
 
     parent::submitForm($form, $form_state);

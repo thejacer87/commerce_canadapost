@@ -132,15 +132,7 @@ class CanadaPost extends ShippingMethodBase {
       '#default_value' => $this->configuration['api_information']['mode'],
     ];
 
-    $form['shipping_information'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Shipping information'),
-      '#description' => $this->isConfigured() ? $this->t('Update your Shipping information.') : $this->t('Fill in your Shipping information.'),
-      '#weight' => $this->isConfigured() ? 10 : -10,
-      '#open' => !$this->isConfigured(),
-    ];
-
-    $form['shipping_information']['origin_postal_code'] = [
+    $form['api_information']['origin_postal_code'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Origin postal code'),
       '#description' => $this->t("Enter the postal code that your shipping rates will originate. If left empty, shipping rates will be rated from your store's postal code."),
@@ -175,7 +167,7 @@ class CanadaPost extends ShippingMethodBase {
     $this->configuration['api_information']['password'] = $values['api_information']['password'];
     $this->configuration['api_information']['customer_number'] = $values['api_information']['customer_number'];
     $this->configuration['api_information']['mode'] = $values['api_information']['mode'];
-    $this->configuration['shipping_information']['origin_postal_code'] = $values['shipping_information']['origin_postal_code'];
+    $this->configuration['api_information']['origin_postal_code'] = $values['api_information']['origin_postal_code'];
     $this->configuration['options']['log'] = $values['options']['log'];
 
     return parent::submitConfigurationForm($form, $form_state);

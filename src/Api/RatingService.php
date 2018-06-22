@@ -65,8 +65,8 @@ class RatingService implements RatingServiceInterface {
     $order_id = $shipment->order_id->target_id;
     $order_storage = $this->entityTypeManager->getStorage('commerce_order');
     $order = $order_storage->load($order_id);
-    $origin_postal_code = !empty($this->configuration['shipping_info']['origin_postal_code'])
-      ? $this->configuration['shipping_info']['origin_postal_code']
+    $origin_postal_code = !empty($this->config->get('api.rate.origin_postal_code'))
+      ? $this->config->get('api.rate.origin_postal_code')
       : $order->getStore()
         ->getAddress()
         ->getPostalCode();

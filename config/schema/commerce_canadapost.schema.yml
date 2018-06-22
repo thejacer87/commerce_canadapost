@@ -15,6 +15,8 @@ commerce_canadapost.settings:
         password:
           type: string
           label: 'Password'
-        origin_postal_code:
-          type: string
-          label: 'Origin postal code'
+        rate:
+          mapping:
+            origin_postal_code:
+              type: string
+              label: 'Origin postal code'
