@@ -16,6 +16,8 @@ commerce_canadapost.settings:
           type: string
           label: 'Password'
         rate:
+          type: mapping
+          label: 'Ratings API settings'
           mapping:
             origin_postal_code:
               type: string
