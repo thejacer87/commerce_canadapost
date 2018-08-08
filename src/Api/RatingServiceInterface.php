@@ -12,7 +12,7 @@ interface RatingServiceInterface {
   /**
    * Get rates from the Canada Post API.
    *
-   * @param ShipmentInterface $shipment
+   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
    *   The shipment.
    *
    * @return \Drupal\commerce_shipping\ShippingRate[]

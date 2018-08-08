@@ -23,7 +23,8 @@
         },
         "patches": {
             "drupal/commerce_shipping": {
-                "Add Shipments tab to Order page": "https://www.drupal.org/files/issues/2018-06-27/commerce_shipping-shipments-tab-2981945-2.patch"
+                "Add Shipments tab to Order page": "https://www.drupal.org/files/issues/2018-06-27/commerce_shipping-shipments-tab-2981945-2.patch",
+                "Dispatch Event to allow modules to change the calculated shipping rates": "https://www.drupal.org/files/issues/2018-08-08/commerce_shipping-dispatch-event-2991416-2.patch"
             }
         }
     }
