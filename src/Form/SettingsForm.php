@@ -71,6 +71,19 @@ class SettingsForm extends ConfigFormBase {
       '#description' => $this->t("Enter the postal code that your shipping rates will originate. If left empty, shipping rates will be rated from your store's postal code."),
     ];
 
+    $form['shipping_rates'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Shipping Rate Modifications'),
+      '#open' => TRUE,
+    ];
+
+    $form['shipping_rates']['modifier'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('conversion'),
+      '#default_value' => $config->get('shipping_rates.conversion'),
+      '#required' => FALSE,
+      ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -85,6 +98,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('api.password', $form_state->getValue('api_password'))
       ->set('api.mode', $form_state->getValue('api_mode'))
       ->set('api.rate.origin_postal_code', $form_state->getValue('origin_postal_code'))
+      ->set('shipping_rates.conversion', $form_state->getValue('modifier'))
       ->save();
 
     parent::submitForm($form, $form_state);

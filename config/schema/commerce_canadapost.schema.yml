@@ -22,3 +22,11 @@ commerce_canadapost.settings:
             origin_postal_code:
               type: string
               label: 'Origin postal code'
+        shipping_rates:
+          type: mapping
+          label: 'Shipping Rates'
+          mapping:
+            conversion:
+              type: string
+              label: 'Conversion Rate'
+

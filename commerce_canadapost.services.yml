@@ -6,3 +6,8 @@ services:
   commerce_canadapost.tracking_api:
     class: Drupal\commerce_canadapost\Api\TrackingService
     arguments: ['@config.factory', '@logger.factory']
+
+  commerce_canadapost.shipping_rates_subsriber:
+    class: Drupal\commerce_canadapost\EventSubscriber\ShippingRatesSubscriber
+    tags:
+    - { name: event_subscriber }
