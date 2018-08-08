@@ -26,7 +26,9 @@ commerce_canadapost.settings:
           type: mapping
           label: 'Shipping Rates'
           mapping:
-            conversion:
+            modifier:
               type: string
-              label: 'Conversion Rate'
-
+              label: 'Modifier'
+            amount:
+              type: commerce_number
+              label: 'Amount'

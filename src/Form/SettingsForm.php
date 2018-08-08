@@ -11,6 +11,12 @@ use Drupal\Core\Form\FormStateInterface;
 class SettingsForm extends ConfigFormBase {
 
   /**
+   * Constants.
+   */
+  const PERCENTAGE = 'percentage';
+  const FIXED = 'fixed';
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -77,12 +83,22 @@ class SettingsForm extends ConfigFormBase {
       '#open' => TRUE,
     ];
 
-    $form['shipping_rates']['modifier'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('conversion'),
-      '#default_value' => $config->get('shipping_rates.conversion'),
+    $form['shipping_rates']['amount'] = [
+      '#type' => 'commerce_number',
+      '#size' => 16,
+      '#title' => $this->t('Amount'),
+      '#default_value' => $config->get('shipping_rates.amount'),
+      '#description' => $this->t('Modify the shipping rates by a fixed amount or percentage.'),
       '#required' => FALSE,
-      ];
+    ];
+
+    $form['shipping_rates']['modifier'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Modifier'),
+      '#options' => [$this::FIXED => '$', $this::PERCENTAGE => '%'],
+      '#default_value' => $config->get('shipping_rates.modifier'),
+      '#required' => FALSE,
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -98,7 +114,8 @@ class SettingsForm extends ConfigFormBase {
       ->set('api.password', $form_state->getValue('api_password'))
       ->set('api.mode', $form_state->getValue('api_mode'))
       ->set('api.rate.origin_postal_code', $form_state->getValue('origin_postal_code'))
-      ->set('shipping_rates.conversion', $form_state->getValue('modifier'))
+      ->set('shipping_rates.modifier', $form_state->getValue('modifier'))
+      ->set('shipping_rates.amount', $form_state->getValue('amount'))
       ->save();
 
     parent::submitForm($form, $form_state);

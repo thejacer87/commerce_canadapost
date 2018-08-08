@@ -9,5 +9,6 @@ services:
 
   commerce_canadapost.shipping_rates_subsriber:
     class: Drupal\commerce_canadapost\EventSubscriber\ShippingRatesSubscriber
+    arguments: ['@config.factory', '@commerce_price.rounder']
     tags:
     - { name: event_subscriber }
