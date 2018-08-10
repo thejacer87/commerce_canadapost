@@ -30,7 +30,7 @@ class CanadaPostRateRequestTest extends UnitTestCase {
   /**
    * @var \Drupal\commerce_canadapost\Api\RatingServiceInterface
    */
-  protected $rating_service;
+  protected $ratingService;
   
   /**
    * @var \Drupal\commerce_shipping\Entity\ShipmentInterface
@@ -63,7 +63,7 @@ class CanadaPostRateRequestTest extends UnitTestCase {
     $logger_factory->get(COMMERCE_CANADAPOST_LOGGER_CHANNEL)
       ->willReturn($logger->reveal());
     
-    $this->rating_service = new RatingService($config_factory->reveal(), $logger_factory->reveal());
+    $this->ratingService = new RatingService($config_factory->reveal(), $logger_factory->reveal());
   
   }
   
@@ -78,7 +78,7 @@ class CanadaPostRateRequestTest extends UnitTestCase {
         [],
         file_get_contents(__DIR__ . '/../Mocks/rating-response-success.xml')),
     ]);
-    $rates = $this->rating_service->getRates($shipment, ['handler' => $mock_handler]);
+    $rates = $this->ratingService->getRates($shipment, ['handler' => $mock_handler]);
     
     // Test the parsed response
     foreach ($rates as $rate) {

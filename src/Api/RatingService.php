@@ -76,7 +76,7 @@ class RatingService implements RatingServiceInterface {
         json_encode($exception->getResponseBody())
       );
       $this->logger->error($message);
-      return [];
+      return;
     }
 
     return $this->parseResponse($response);
