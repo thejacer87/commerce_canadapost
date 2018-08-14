@@ -188,6 +188,14 @@ class CanadaPost extends ShippingMethodBase {
       return [];
     }
 
+    $option_codes = [];
+    $canada_post_config = $this->configFactory->get('commerce_canadapost.settings');
+    if ($canada_post_config->get('option_codes')) {
+      $option_codes = $canada_post_config->get('option_codes.codes');
+    }
+
+    return $this->ratingService->getRates($shipment, ['debug' => FALSE, 'option_codes' => $option_codes]);
+
     return $this->ratingService->getRates($shipment);
   }
 
