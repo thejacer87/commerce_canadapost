@@ -71,28 +71,6 @@ class SettingsForm extends ConfigFormBase {
       '#description' => $this->t("Enter the postal code that your shipping rates will originate. If left empty, shipping rates will be rated from your store's postal code."),
     ];
 
-    $form['option_codes'] = [
-      '#type'  => 'details',
-      '#title' => $this->t('Shipping rate options codes'),
-      '#open'  => TRUE,
-    ];
-
-    $form['option_codes']['codes'] = [
-      '#type' => 'checkboxes',
-      '#options' => [
-        'so'   => 'Signature (SO)',
-        'pa18' => 'Proof of Age Required - 18 (PA18)',
-        'pa19' => 'Proof of Age Required - 19 (PA19)',
-        'hfp'  => 'Card for pickup (HFP)',
-        'dns'  => 'Do not safe drop (DNS)',
-        'lad'  => 'Leave at door - do not card (LAD)',
-      ],
-      '#default_value' => $config->get('option_codes.codes'),
-      '#description' => $this->t(
-        "Select which options to add to the get rates request. <strong>NOTE:</strong> Some options conflict with each other (eg. PA18, PA19 and DNS), so be sure to check the logs if the rates fail to load on checkout as the Canada Post API can't currently handle the conflicts."
-      ),
-    ];
-
     return parent::buildForm($form, $form_state);
   }
 
@@ -107,7 +85,6 @@ class SettingsForm extends ConfigFormBase {
       ->set('api.password', $form_state->getValue('api_password'))
       ->set('api.mode', $form_state->getValue('api_mode'))
       ->set('api.rate.origin_postal_code', $form_state->getValue('origin_postal_code'))
-      ->set('option_codes.codes', $form_state->getValue('codes'))
       ->save();
 
     parent::submitForm($form, $form_state);
