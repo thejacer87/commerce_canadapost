@@ -100,6 +100,7 @@ class CanadaPost extends ShippingMethodBase {
         'shipping_information' => [
           'origin_postal_code' => '',
         ],
+        'option_codes' => [],
         'options' => [
           'log' => [],
         ],
@@ -203,8 +204,10 @@ class CanadaPost extends ShippingMethodBase {
     $this->configuration['api_information']['customer_number'] = $values['api_information']['customer_number'];
     $this->configuration['api_information']['mode'] = $values['api_information']['mode'];
     $this->configuration['api_information']['origin_postal_code'] = $values['api_information']['origin_postal_code'];
-    $this->configuration['option_codes'] = $values['option_codes']['codes'];
     $this->configuration['options']['log'] = $values['options']['log'];
+
+    // Remove the empty options codes.
+    $this->configuration['option_codes'] = array_diff($values['option_codes']['codes'], ['0']);
 
     return parent::submitConfigurationForm($form, $form_state);
   }
