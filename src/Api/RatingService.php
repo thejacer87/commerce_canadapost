@@ -106,8 +106,16 @@ class RatingService implements RatingServiceInterface {
       return [];
     }
 
+    $price_quotes = $response['price-quotes']['price-quote'];
+
+    // If only one service comes back, it does NOT return an array of quote. So
+    // until the API always returns an array manually create the array.
+    if (array_key_exists('service-code', $price_quotes)) {
+      $price_quotes = [$price_quotes];
+    }
+
     $rates = [];
-    foreach ($response['price-quotes']['price-quote'] as $rate) {
+    foreach ($price_quotes as $rate) {
       $service_code = $rate['service-code'];
       $service_name = $rate['service-name'];
       $price = new Price((string) $rate['price-details']['due'], 'CAD');
