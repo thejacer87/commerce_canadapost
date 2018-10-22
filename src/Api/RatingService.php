@@ -67,7 +67,7 @@ class RatingService implements RatingServiceInterface {
       'username' => $this->config->get('api.username'),
       'password' => $this->config->get('api.password'),
       'customer_number' => $this->config->get('api.customer_number'),
-      'contract_id' => $this->config->get['contract_id'],
+      'contract_id' => $this->config->get('api.contract_id'),
       'env' => $this->getEnvironmentMode(),
     ];
 
