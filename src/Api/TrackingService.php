@@ -75,8 +75,8 @@ class TrackingService implements TrackingServiceInterface {
    * @param array $response
    *   The response from the Canada Post API Rating service.
    *
-   * @return \Drupal\commerce_shipping\ShippingRate[]
-   *   The Canada Post shipping rates.
+   * @return array
+   *   The tracking summary from Canada Post.
    */
   private function parseResponse(array $response) {
     if (!empty($response['tracking-summary']['pin-summary'])) {

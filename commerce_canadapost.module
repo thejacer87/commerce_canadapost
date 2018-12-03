@@ -5,6 +5,8 @@
  * Provides functionality for the Commerce Canada Post module.
  */
 
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -94,4 +96,113 @@ function commerce_canadapost_commerce_shipment_form_submit($form, FormStateInter
 
   $form_state->setValues($values);
   $shipment->set('tracking_code', $submitted_tracking_pin);
+}
+
+/**
+ * Implements hook_cron().
+ */
+function commerce_canadapost_cron() {
+  // Update tracking data for all incomplete canadapost shipments with a
+  // tracking code.
+  _commerce_canadapost_update_tracking_data();
+}
+
+/**
+ * Update tracking data for all incomplete canadapost shipments.
+ *
+ * @param array $order_ids
+ *   An array of order IDs to update the tracking data for. Leave empty to
+ *   update all orders with incomplete shipments.
+ *
+ * @return array
+ *   An array of order IDs for which the shipments were updated for.
+ */
+function _commerce_canadapost_update_tracking_data(array $order_ids = NULL) {
+  $updated_order_ids = [];
+
+  /** @var \Drupal\commerce_canadapost\Api\TrackingService $tracking_service */
+  $tracking_service = \Drupal::service('commerce_canadapost.tracking_api');
+
+  // Fetch shipments for tracking.
+  $shipments = _commerce_canadapost_fetch_shipments_for_tracking($order_ids);
+
+  foreach ($shipments as $shipment) {
+    /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment */
+    // Fetch tracking summary.
+    $tracking_summary = $tracking_service->fetchTrackingSummary($shipment->getTrackingCode());
+
+    // Update the shipment fields with the tracking data.
+    $updated_order_ids[] = commerce_canadapost_update_tracking_fields($shipment, $tracking_summary);
+  }
+
+  return $updated_order_ids;
+}
+
+/**
+ * Fetch all incomplete canadapost shipments that have a tracking pin.
+ *
+ * @param array $order_ids
+ *   Only fetch shipments of specific order IDs.
+ *
+ * @return array
+ *   An array of shipment entities.
+ */
+function _commerce_canadapost_fetch_shipments_for_tracking(array $order_ids = NULL) {
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // Query the db for the incomplete shipments.
+  $shipment_query = $entity_type_manager
+    ->getStorage('commerce_shipment')
+    ->getQuery();
+  $shipment_query
+    ->condition('type', 'canadapost')
+    ->condition('state', 'completed', '!=')
+    ->condition('tracking_code', NULL, 'IS NOT NULL');
+  // If specific order IDs have been passed.
+  if (!empty($order_ids)) {
+    $shipment_query->condition('order_id', $order_ids, 'IN');
+  }
+  // Fetch the results.
+  $shipment_ids = $shipment_query->execute();
+
+  // Return the loaded shipment entities.
+  return $entity_type_manager
+    ->getStorage('commerce_shipment')
+    ->loadMultiple($shipment_ids);
+}
+
+/**
+ * Update the shipment fields with the tracking summary.
+ *
+ * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
+ *   The commerce shipment.
+ * @param array $tracking_summary
+ *   The tracking summary from Canada Post.
+ *
+ * @return int
+ *   The order ID for which the shipment was updated for.
+ */
+function commerce_canadapost_update_tracking_fields(ShipmentInterface $shipment, array $tracking_summary) {
+  // Update the fields.
+  if (!empty($tracking_summary['actual-delivery-date'])) {
+    $shipment->set('field_actual_delivery', new DrupalDateTime($tracking_summary['actual-delivery-date']));
+  }
+
+  if (!empty($tracking_summary['attempted-date'])) {
+    $shipment->set('field_attempted_delivery', new DrupalDateTime($tracking_summary['attempted-date']));
+  }
+
+  if (!empty($tracking_summary['expected-delivery-date'])) {
+    $shipment->set('field_expected_delivery', new DrupalDateTime($tracking_summary['expected-delivery-date']));
+  }
+
+  if (!empty($tracking_summary['mailed-on-date'])) {
+    $shipment->set('field_mailed_on', new DrupalDateTime($tracking_summary['mailed-on-date']));
+  }
+
+  // Now, save the shipment.
+  $shipment->save();
+
+  // Return the order ID for this updated shipment.
+  return $shipment->getOrderId();
 }
