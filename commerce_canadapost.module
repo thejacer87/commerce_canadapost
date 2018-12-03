@@ -5,7 +5,6 @@
  * Provides functionality for the Commerce Canada Post module.
  */
 
-use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
